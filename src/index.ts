@@ -22,7 +22,27 @@ const expression = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
  * Validate function.
  */
 function ssnIsValid(value) {
-  return expression.test(value.replace(/\W/g, ''));
+  const valueTest = value.replace(/\W/g, '');
+  let dateStr = '';
+
+  switch(valueTest.length - 4) {
+    case 6:
+      //YY-MM-DD
+      dateStr = `${valueTest.substring(0, 2)}-${valueTest.substring(2, 4)}-${valueTest.substring(4, 6)}`;
+      break;
+    
+    case 8:
+      //YYYY-MM-DD
+      dateStr = `${valueTest.substring(0, 4)}-${valueTest.substring(4, 6)}-${valueTest.substring(6, 8)}`;
+      break;
+
+    default:
+      //Invalid date
+      dateStr = 'whoops';
+      break;
+  }
+
+  return !isNaN( Date.parse(dateStr) ) && expression.test(valueTest);
 }
 
 /**
