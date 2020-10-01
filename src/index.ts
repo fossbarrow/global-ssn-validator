@@ -24,12 +24,14 @@ const expression = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
 function ssnIsValid(value) {
   let dateArr, dateStr;
 
+  value = value.replace(/\W/g, '-');
+
   if (value.includes('-')) {
     dateArr = value.split('-');
 
     if(dateArr.length !== 4) {
       //Invalid SSN format
-      throw new Error('Invalid Swedish Social Security Number');
+      return false;
     }
     else {
       dateArr.pop();
@@ -50,7 +52,7 @@ function ssnIsValid(value) {
 
       default:
         //Invalid date
-        throw new Error('Invalid Swedish Social Security Number');
+        return false;
         break;
     }
   }
@@ -64,10 +66,11 @@ function ssnIsValid(value) {
  * The numbers left unmasked can be used to determine the gender and day of birth.
  */
 function ssnMask(value) {
-  value = value.replace(/\W/g, '');
   if (!ssnIsValid(value)) {
     throw new Error('Invalid Swedish Social Security Number');
   }
+  
+  value = value.replace(/\W/g, '');
 
   switch (value.length) {
     case 12:
