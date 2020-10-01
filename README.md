@@ -73,6 +73,12 @@ ssnMask('12345678912');
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
+## Contributing
+
+Feel free to add a pull-request containing a new directory, a new SEO checklist tips, spelling errors and/or format fixes!
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
 ## Credits
 
 - [PatricNox](https://github.com/PatricNox)
