@@ -75,7 +75,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Feel free to add a pull-request containing a new directory, a new SEO checklist tips, spelling errors and/or format fixes!
+Feel free to add a pull-request containing changes to the validator, making it more accurate and/or faster!
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
