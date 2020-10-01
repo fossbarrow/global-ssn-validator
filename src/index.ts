@@ -22,7 +22,42 @@ const expression = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
  * Validate function.
  */
 function ssnIsValid(value) {
-  return expression.test(value.replace(/\W/g, ''));
+  let dateArr, dateStr;
+
+  value = value.replace(/\W/g, '-');
+
+  if (value.includes('-')) {
+    dateArr = value.split('-');
+
+    if(dateArr.length !== 4) {
+      //Invalid SSN format
+      return false;
+    }
+    else {
+      dateArr.pop();
+      dateStr = (dateArr.join('-'));
+    }
+  }
+  else {
+    switch(value.length - 4) {
+      case 6:
+        //YY-MM-DD
+        dateStr = `${value.substring(0, 2)}-${value.substring(2, 4)}-${value.substring(4, 6)}`;
+        break;
+        
+      case 8:
+        //YYYY-MM-DD
+        dateStr = `${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`;
+        break;
+
+      default:
+        //Invalid date
+        return false;
+        break;
+    }
+  }
+
+  return !isNaN( Date.parse(dateStr) ) && expression.test(value.replace(/\W/g, ''));
 }
 
 /**
@@ -31,10 +66,11 @@ function ssnIsValid(value) {
  * The numbers left unmasked can be used to determine the gender and day of birth.
  */
 function ssnMask(value) {
-  value = value.replace(/\W/g, '');
   if (!ssnIsValid(value)) {
     throw new Error('Invalid Swedish Social Security Number');
   }
+  
+  value = value.replace(/\W/g, '');
 
   switch (value.length) {
     case 12:
