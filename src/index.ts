@@ -16,13 +16,13 @@
  * Regular expression to match dates after 1800 and include possibility to be
  * over 100 years old. 
  */
-const expression = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
+const expression: RegExp = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
 
 /**
  * Validate function.
  */
-function ssnIsValid(value) {
-  let dateArr, dateStr;
+function ssnIsValid(value: string): boolean {
+  let dateArr: Array<string>, dateStr: string;
 
   value = value.replace(/\W/g, '-');
 
@@ -53,7 +53,6 @@ function ssnIsValid(value) {
       default:
         //Invalid date
         return false;
-        break;
     }
   }
 
@@ -65,7 +64,7 @@ function ssnIsValid(value) {
  * E.g. "12345678-1234" -> "XXXXXX78XX3X ", "123456-1234" -> "XXXX56XX3X".
  * The numbers left unmasked can be used to determine the gender and day of birth.
  */
-function ssnMask(value) {
+function ssnMask(value: string): string | never {
   if (!ssnIsValid(value)) {
     throw new Error('Invalid Swedish Social Security Number');
   }
