@@ -19,18 +19,80 @@
 const expression = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
 
 /**
- * Validate function.
+ * Validate function for SSN which combines different checks.
  */
-function ssnIsValid(value) {
+function ssnIsValid(value): boolean {
+  let isSsnValid : boolean;
+  isSsnValid = false;
+
+  // Apply the different check functions and first start with the format check because if that fails everything else should fail too as the functions might assume a correct format
+  isSsnValid = ssnIsFormatValid(value);
+  if (isSsnValid) {
+    isSsnValid = isSsnValid && ssnIsDateValid(value);
+    if (isSsnValid) {
+      isSsnValid = isSsnValid && ssnIsChecksumValid(value);
+      if (isSsnValid) {
+
+      } else {
+        console.log("Checksum was invalid!");
+      }
+    } else {
+      console.log("Date was invalid!");
+    }
+  } else {
+    console.log("Format was invalid!");
+  }
+
+  isSsnValid = ssnIsFormatValid(value) && ssnIsDateValid(value) && ssnIsChecksumValid(value) 
+  return isSsnValid;
+}
+
+/**
+ * Helper function that removes all non-word characters (so digits and letters remain but e.g. '-' gets removed) in a string.
+ */
+function removeNonWordCharacters(stringToHandle: string): string {
+  let stringWithoutNonWordCharacters: string;
+  stringWithoutNonWordCharacters = stringToHandle;
+
+  // Just get the String without non-word characters
+  stringWithoutNonWordCharacters = stringWithoutNonWordCharacters.replace(/\W/g, '');
+  
+  return stringWithoutNonWordCharacters;
+}
+
+/** 
+ * Checks if the format of the SSN is valid. 
+ */
+function ssnIsFormatValid(ssnToCheckFormatFor: string): boolean {
+  let isValidSsnFormat : boolean;
+  let ssnToCheckWithoutNonWordChars : string;
+
+  // Remove non-word characters from the String to make it easier to test
+  ssnToCheckWithoutNonWordChars = removeNonWordCharacters(ssnToCheckFormatFor);
+  
+  // Check if the String matches the defined pattern
+  isValidSsnFormat = expression.test(ssnToCheckWithoutNonWordChars);
+
+  // As an additional security measure try to parse the SSN without non-word characters into a number, if that fails you know that something is wrong
+  return isValidSsnFormat && !isNaN( Number(ssnToCheckWithoutNonWordChars) );
+}
+
+/** 
+ * Checks if the date in the SSN is valid. 
+ */
+function ssnIsDateValid(ssnToCheckDateFor: string): boolean {
   let dateArr, dateStr;
+  let isSsnDateValid: boolean;
+  isSsnDateValid = false;
 
-  value = value.replace(/\W/g, '-');
+  ssnToCheckDateFor = ssnToCheckDateFor.replace(/\W/g, '-');
 
-  if (value.includes('-')) {
-    dateArr = value.split('-');
+  if (ssnToCheckDateFor.includes('-')) {
+    dateArr = ssnToCheckDateFor.split('-');
 
-    if(dateArr.length !== 4) {
+    if (dateArr.length !== 4) {
       //Invalid SSN format
+      // TODO: Not sure if this is correct all the time, e.g. for 811228-9874 the validation fails!
       return false;
     }
     else {
@@ -39,15 +101,15 @@ function ssnIsValid(value) {
     }
   }
   else {
-    switch(value.length - 4) {
+    switch (ssnToCheckDateFor.length - 4) {
       case 6:
         //YY-MM-DD
-        dateStr = `${value.substring(0, 2)}-${value.substring(2, 4)}-${value.substring(4, 6)}`;
+        dateStr = `${ssnToCheckDateFor.substring(0, 2)}-${ssnToCheckDateFor.substring(2, 4)}-${ssnToCheckDateFor.substring(4, 6)}`;
         break;
         
       case 8:
         //YYYY-MM-DD
-        dateStr = `${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`;
+        dateStr = `${ssnToCheckDateFor.substring(0, 4)}-${ssnToCheckDateFor.substring(4, 6)}-${ssnToCheckDateFor.substring(6, 8)}`;
         break;
 
       default:
@@ -56,63 +118,56 @@ function ssnIsValid(value) {
         break;
     }
   }
+  // Check if the date can be parsed or not to see if it is valid
+  isSsnDateValid = !isNaN( Date.parse(dateStr) );
 
-  return !isNaN( Date.parse(dateStr) ) && expression.test(value.replace(/\W/g, '')) && hasValidSsnChecksum(value) ;
+  return isSsnDateValid;
 }
 
-
 /**
- * Calculate checksum function.
+ * Calculate checksum function for a SSN without the checksum.
+ * WARNING: It assumes that the format of the SSN was checked and that the checksum digit at the end was removed before!
+ * It throws an Error if the amount of digits (without non-word characters) is not 9 or 11!
  */
-function ssnCalculateChecksum(numberToCalculateChecksumFor: number): number {
+function ssnCalculateChecksum(ssnWithoutChecksum: string): string {
   let numberAsString: string;
   let checksum: number;
 
   // Just get the digits as a String
-  numberAsString = String(numberToCalculateChecksumFor)
+  ssnWithoutChecksum = removeNonWordCharacters(ssnWithoutChecksum)
   
   // Initialize the sum
   checksum = 0;
 
-  switch(numberAsString.length) {
-      case 8:
-        // The leading "0" got lost so add it
-        numberAsString = "0" + numberAsString;
+  switch (ssnWithoutChecksum.length) {
+    case 9:
+      // It already has the correct length
       break;
-      case 9:
-        // It already has the correct length
-        break;
-      case 10:
-        // Cut off the last digit as this might be the checksum
-        numberAsString = `${numberAsString.substring(0, 9)}`;
-        break;
-      case 11:
-        // Cut off the first two digits (and ignore the nonexisting checksum that somebody already might have removed it), so the same steps as for case "12:" below
-      case 12:
-        // Cut off the first two and the last digits as they are not used
-        numberAsString = `${numberAsString.substring(2, 11)}`;
-        break;
-      default:
-        // The format is not valid --> Throw an error
-        throw new Error('Invalid Swedish Social Security Number');
-        break;
-    }
-    
-    // Calculate the checksum
-    // First iterate over the digits and multiply them with 2, 1, 2, 1, 2, 1, 2, 1, 2
-    for (let i = 0; i < numberAsString.length; i++) {
-      let currentNumber = parseInt(numberAsString.charAt(i));
-      // Every second digit needs to be multiplied with two
-      if (i % 2 === 0) {
-        currentNumber = currentNumber * 2;
-      }
-      // Make sure to handle the new two digit numbers, that might occur, correctly
-      if (currentNumber > 9) {
-        currentNumber = currentNumber - 9;
-      }
-      // Add the number to the temporary checksum value 
-      checksum = checksum + currentNumber;
+    case 11:
+      // Cut off the first two digits as they are not used
+      ssnWithoutChecksum = `${ssnWithoutChecksum.substring(2, 11)}`;
+      break;
+    default:
+      // The format is not valid --> Throw an error
+      throw new Error('Invalid Swedish Social Security Number');
+      break;
   }
+    
+  // Calculate the checksum
+  // First iterate over the digits and multiply them with 2, 1, 2, 1, 2, 1, 2, 1, 2
+  for (let i = 0; i < ssnWithoutChecksum.length; i++) {
+    let currentNumber = parseInt(ssnWithoutChecksum.charAt(i));
+    // Every second digit needs to be multiplied with two
+    if (i % 2 === 0) {
+      currentNumber = currentNumber * 2;
+    }
+    // Make sure to handle the new two digit numbers, that might occur, correctly
+    if (currentNumber > 9) {
+      currentNumber = currentNumber - 9;
+    }
+    // Add the number to the temporary checksum value 
+    checksum = checksum + currentNumber;
+  }  
   // Apply the last calculation steps
   // Get the last digit
   checksum = checksum % 10;
@@ -124,43 +179,24 @@ function ssnCalculateChecksum(numberToCalculateChecksumFor: number): number {
     // Calculate 10 - last digit
     checksum = 10 - checksum;
   }
-  return checksum;
-}
-
-/**
- * Returns only the digits as a number.
- */
-function ssnExtractDigitsAsNumber(ssnToExtractDigitsFrom: string): number {
-  let digitsAsString: string;
-  let extractedDigitsAsNumber: number;
-
-  // Just get the digits as a String
-  digitsAsString = ssnToExtractDigitsFrom.replace(/\W/g, '');
-  
-  extractedDigitsAsNumber = Number(digitsAsString)
-  
-  return extractedDigitsAsNumber;
+  return String(checksum);
 }
 
 /**
  * Checks if the given SSN has the correct checksum.
  */
-function hasValidSsnChecksum(ssnToCheckChecksumFor: string): boolean {
-  let digitsAsString: string;
-  let extractedChecksum: number;
-  let calculatedChecksum: number;
-  let extractedDigitsAsNumber: number;
-
-  // Get the digits as a number
-  extractedDigitsAsNumber = ssnExtractDigitsAsNumber(ssnToCheckChecksumFor);
-  // Get the digits as a String
-  digitsAsString = String(extractedDigitsAsNumber);
-  // Extract the checksum from the string
-  extractedChecksum = Number(digitsAsString.substring(digitsAsString.length-1, digitsAsString.length));
+function ssnIsChecksumValid(ssnToCheckChecksumFor: string): boolean {
+  let extractedChecksum: string;
+  let ssnWithoutChecksum: string;
+  let calculatedChecksum: string;
   
+  // Extract the checksum from the given SSN string
+  extractedChecksum = ssnToCheckChecksumFor.substring(ssnToCheckChecksumFor.length-1, ssnToCheckChecksumFor.length);
+  // Extract the SSN without the checksum from the SSN string
+  ssnWithoutChecksum = ssnToCheckChecksumFor.substring(0, ssnToCheckChecksumFor.length-1);
   // Calculate the checksum
-  calculatedChecksum = ssnCalculateChecksum(extractedDigitsAsNumber);
-  // Return the result of the comparison between calculated and given checksum
+  calculatedChecksum = ssnCalculateChecksum(ssnWithoutChecksum);
+  // Return the result of the comparison between calculated and extracted checksum
   return calculatedChecksum === extractedChecksum;
 }
 
