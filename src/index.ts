@@ -26,23 +26,6 @@ function ssnIsValid(value): boolean {
   isSsnValid = false;
 
   // Apply the different check functions and first start with the format check because if that fails everything else should fail too as the functions might assume a correct format
-  isSsnValid = ssnIsFormatValid(value);
-  if (isSsnValid) {
-    isSsnValid = isSsnValid && ssnIsDateValid(value);
-    if (isSsnValid) {
-      isSsnValid = isSsnValid && ssnIsChecksumValid(value);
-      if (isSsnValid) {
-
-      } else {
-        console.log("Checksum was invalid!");
-      }
-    } else {
-      console.log("Date was invalid!");
-    }
-  } else {
-    console.log("Format was invalid!");
-  }
-
   isSsnValid = ssnIsFormatValid(value) && ssnIsDateValid(value) && ssnIsChecksumValid(value) 
   return isSsnValid;
 }
@@ -227,4 +210,5 @@ function ssnMask(value) {
 /**
  * Exports.
  */
-module.exports = { ssnMask, ssnIsValid };
+export = { SwedishSsnValidator }; // make it a module
+module.exports = { ssnMask, ssnIsValid, ssnCalculateChecksum, ssnIsChecksumValid};
