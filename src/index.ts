@@ -210,5 +210,4 @@ function ssnMask(value) {
 /**
  * Exports.
  */
-export = { SwedishSsnValidator }; // make it a module
-module.exports = { ssnMask, ssnIsValid, ssnCalculateChecksum, ssnIsChecksumValid};
+module.exports = { ssnMask, ssnIsValid };
