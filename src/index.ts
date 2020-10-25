@@ -23,13 +23,20 @@ const expression = /^(19|20)?(\d{6}\d{4}|(?!19|20)\d{10})$/;
  */
 function ssnIsValid(value) {
   let dateArr, dateStr;
+  let isSsnDateValid: boolean;
+  isSsnDateValid = false;
 
+  // Replace all non-word characters with '-', e.g. "1900-01-01:1234" will result in "1900-01-01-1234"
   value = value.replace(/\W/g, '-');
+  
+  // If the SSN is in the format 19000101-1234 (or 000101-1234) this will result in an array with two entries
+  dateArr = value.split('-');
 
-  if (value.includes('-')) {
+  // Check that it is not of the format 19000101-1234 (or 000101-1234) and includes more than one '-'
+  if (dateArr.length !== 2 && value.includes('-')) {
     dateArr = value.split('-');
 
-    if(dateArr.length !== 4) {
+    if (dateArr.length !== 4) {
       //Invalid SSN format
       return false;
     }
@@ -39,7 +46,10 @@ function ssnIsValid(value) {
     }
   }
   else {
-    switch(value.length - 4) {
+    // Make sure that the SSN in the format 19000101-1234 (or 000101-1234) can be handled by removing the '-'
+    value = value.replace(/\W/g, '');
+    // Handle the digits for dates correctly by bringing them into a specific format that can later be parsed to check the date
+    switch (value.length - 4) {
       case 6:
         //YY-MM-DD
         dateStr = `${value.substring(0, 2)}-${value.substring(2, 4)}-${value.substring(4, 6)}`;
@@ -56,8 +66,10 @@ function ssnIsValid(value) {
         break;
     }
   }
+  // Check if the date can be parsed or not to see if it is valid
+  isSsnDateValid = !isNaN( Date.parse(dateStr) );
 
-  return !isNaN( Date.parse(dateStr) ) && expression.test(value.replace(/\W/g, ''));
+  return isSsnDateValid && expression.test(value.replace(/\W/g, ''));
 }
 
 /**
