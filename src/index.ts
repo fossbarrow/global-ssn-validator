@@ -235,7 +235,3 @@ class swedishSSN {
         return arr;
     };
 }
-
-const ssn = new SSN("SE");
-console.log(ssn.mask("123456-1234"));
-console.log(ssn.validate("430416+1476"));
