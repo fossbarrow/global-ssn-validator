@@ -1,4 +1,4 @@
-# Swedish SSN Validator
+# Global SSN Validator
 
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
