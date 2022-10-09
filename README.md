@@ -77,7 +77,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 Feel free to add a pull-request containing changes to the validator, making it more accurate and/or faster!
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](/CONTRIBUTING.md) for details.
 
 ## Credits
 
@@ -86,4 +86,4 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](/LICENSE) for more information.
