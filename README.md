@@ -4,6 +4,17 @@
 
 Validate and mask functionality for an Swedish Social Security Number (SSN).
 
+**Example**
+
+```js
+
+ssnIsValid('1990-11-21:1234');
+// => True
+
+ssnMask('19900211-1234') // The ssn key for _day of birth_ and _gender_ is left unmasked.
+// => XXXXXX11XX3X 
+```
+
 ## Installation
 Install the package via `npm`:
 
@@ -19,30 +30,7 @@ This method validates if the given value is a valid `Social Security Number`.
 string matching 10 or 12 _words_ in length. Dashes and colons are ignored to the
 length count.
 
-#### Example
 
-```js
-ssnIsValid({});
-// => false
-
-ssnIsValid('011-23-4567');
-// => false
-
-ssnIsValid('011234567');
-// => false
-
-ssnIsValid('1990-11-21:1234');
-// => True
-
-ssnIsValid('199011211234');
-// => True
-
-ssnIsValid('9011211234');
-// => True
-
-ssnIsValid('90-11-21:1234');
-// => True
-```
 
 --------------------------------------------------------------------------------
 
